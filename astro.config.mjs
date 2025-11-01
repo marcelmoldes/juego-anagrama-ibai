@@ -2,13 +2,12 @@
 import { defineConfig } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
 
-// https://astro.build/config
 export default defineConfig({
   vite: {
     build: {
-      target: 'esnext',
+      target: "esnext",
+      charset: "utf-8", // 👈 fuerza la codificación UTF-8 en el build
     },
     plugins: [tailwindcss()],
   },
-  
 });

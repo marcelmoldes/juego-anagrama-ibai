@@ -45,19 +45,20 @@ import fondoAnagrama from "../assets/fondo-anagrama.jpg";
       id="chat-container"
       class="max-w-md mx-auto mt-10 bg-gray-100 rounded-xl shadow-lg p-4 flex flex-col space-y-4 h-[600px] overflow-y-auto"
     >
-  <!-- Banner estilo WhatsApp -->
-  <!-- Header del chat -->
-  <div class="flex items-center bg-green-500 text-white px-4 py-3">
-    <img
-      src="https://i.pravatar.cc/40?img=12"
-      alt="Foto de contacto"
-      class="w-10 h-10 rounded-full mr-3"
-    />
-    <div>
-      <h3 class="font-semibold">Ibai</h3>
-      <p class="text-sm text-green-200">En línea</p>
-    </div>
-  </div>
+      <!-- Header estilo WhatsApp -->
+      <div class="flex items-center bg-green-500 text-white px-4 py-3">
+        <img
+          src="https://i.pravatar.cc/40?img=12"
+          alt="Foto de contacto"
+          class="w-10 h-10 rounded-full mr-3"
+        />
+        <div>
+          <h3 class="font-semibold">Ibai</h3>
+          <p class="text-sm text-green-200">En línea</p>
+        </div>
+      </div>
+
+      <!-- Input -->
       <div class="mt-auto flex items-center space-x-2 bg-gray-200 p-2 rounded-lg">
         <input
           id="input-msg"
@@ -72,6 +73,29 @@ import fondoAnagrama from "../assets/fondo-anagrama.jpg";
     </div>
   </div>
 </div>
+
+<!-- MODAL DE REGLAS -->
+<div
+  id="modal-reglas"
+  class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+>
+  <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 max-w-lg text-gray-800 dark:text-white relative">
+    <h3 class="text-xl font-semibold mb-2">Reglas del juego</h3>
+    <p class="mb-4 text-sm leading-relaxed">
+      1️⃣ Reordena las letras para descubrir la frase secreta.<br />
+      2️⃣ Puedes escuchar la pista de Ibai si lo necesitas.<br />
+      3️⃣ Solo tienes una oportunidad por día.<br />
+      ¡Buena suerte!
+    </p>
+    <button
+      id="cerrar-modal"
+      class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full px-3 py-1"
+    >
+      ✕
+    </button>
+  </div>
+</div>
+
 
 <!-- MODAL DE REGLAS -->
 <div
@@ -139,6 +163,7 @@ function enviarMensajeAudio(texto, rutaAudio) {
 // Modal reglas
 btnReglas.addEventListener("click", () => { if (!btnReglas.disabled) modalReglas.classList.remove("hidden"); });
 btnCerrar.addEventListener("click", () => modalReglas.classList.add("hidden"));
+const modalReglas = document.getElementById("modal-reglas");
 
 // Validación input
 function validarRespuestaInput() {
@@ -156,7 +181,8 @@ function validarRespuestaInput() {
 btnEnviar.addEventListener("click", validarRespuestaInput);
 inputMsg.addEventListener("keydown", (e)=>{if(e.key==="Enter"){e.preventDefault(); validarRespuestaInput();}});
 
-// Función que inicia las letras después del audio
+let intervaloTiempo = null; // variable global para el contador
+
 function iniciarJuego(msg, audioElement){
   audioElement.controls = false;
   audioElement.style.opacity = "0.5";
@@ -180,23 +206,33 @@ function iniciarJuego(msg, audioElement){
   const contadorDiv = document.createElement("div");
   contadorDiv.className = "text-lg font-bold mb-2";
   msg.appendChild(contadorDiv);
-  setInterval(()=>{tiempo++; contadorDiv.textContent=`Tiempo: ${tiempo} s`},1000);
+
+  // Guardamos el intervalo
+  intervaloTiempo = setInterval(() => {
+    tiempo++;
+    contadorDiv.textContent = `Tiempo: ${tiempo} s`;
+  }, 1000);
+
+  // Div para mensaje final
+  const mensajeFinalDiv = document.createElement("div");
+  mensajeFinalDiv.id = "mensaje-final";
+  mensajeFinalDiv.className = "mt-2 font-semibold text-green-700";
+  msg.appendChild(mensajeFinalDiv);
 
   // Letras
   const letrasUsadas = {};
-  letrasDesordenadas.forEach(letra=>{
+  letrasDesordenadas.forEach(letra => {
     letrasUsadas[letra] = (letrasUsadas[letra]||0)+1;
   });
 
-  letrasDesordenadas.forEach(letra=>{
+  letrasDesordenadas.forEach(letra => {
     const letraDiv = document.createElement("button");
     letraDiv.textContent = letra;
     letraDiv.dataset.letra = letra;
     letraDiv.className = "bg-gray-300 rounded p-2 w-10 h-10 text-center font-bold hover:bg-gray-400";
 
-    letraDiv.addEventListener("click", ()=>{
-      const contador = letrasUsadas[letra];
-      if(!contador || contador <= 0) return;
+    letraDiv.addEventListener("click", () => {
+      if(!letrasUsadas[letra] || letrasUsadas[letra]<=0) return;
 
       const span = document.createElement("span");
       span.textContent = letra;
@@ -206,7 +242,7 @@ function iniciarJuego(msg, audioElement){
       letrasUsadas[letra]--;
       if(letrasUsadas[letra]<=0) letraDiv.disabled = true;
 
-      comprobarFrase(contenedorFrase);
+      comprobarFrase(contenedorFrase, mensajeFinalDiv);
     });
 
     contenedorLetras.appendChild(letraDiv);
@@ -214,15 +250,15 @@ function iniciarJuego(msg, audioElement){
 
   msg.appendChild(contenedorLetras);
 }
-
-// Función comprobar frase clicando letras
-function comprobarFrase(contenedorFrase){
+function comprobarFrase(contenedorFrase, mensajeFinalDiv, tiempo){
   const fraseUsuario = Array.from(contenedorFrase.children).map(span=>span.textContent).join('');
   const usuarioNormalizado = fraseUsuario.replace(/\s/g,'').toUpperCase();
   const solucionNormalizada = solucion.replace(/\s/g,'').toUpperCase();
 
   if(usuarioNormalizado.length === solucionNormalizada.length){
     if(usuarioNormalizado === solucionNormalizada){
+      clearInterval(intervaloTiempo); // detener contador
+      mensajeFinalDiv.textContent = `✅ ¡Juego ganado! Tiempo total: ${tiempo} s`;
       alert("✅ ¡Correcto! Has completado la frase.");
     } else {
       contenedorFrase.classList.add("animate-shake", "border-red-500");
@@ -231,14 +267,12 @@ function comprobarFrase(contenedorFrase){
         contenedorFrase.innerHTML = "";
 
         const botones = contenedorFrase.parentElement.querySelectorAll("#letras-container button");
-        botones.forEach(b=>{
-          const letra = b.dataset.letra;
-          b.disabled = false;
-        });
+        botones.forEach(b => b.disabled = false);
       },800);
     }
   }
 }
+
 
 // Botón empezar
 btnEmpezar.addEventListener("click", ()=>{
