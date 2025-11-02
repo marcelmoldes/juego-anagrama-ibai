@@ -1,9 +1,26 @@
 ---
-import Anagrama from '../components/anagrama.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import "../styles/global.css";
+import LeftSection from "../components/LeftSection.astro";
+import ChatSection from "../components/ChatSection.astro";
+import RulesModal from "../components/RulesModal.astro";
+import GameLogic from "../components/GameLogic.astro";
 ---
 
-	<Anagrama />
+<div class="relative isolate bg-white dark:bg-gray-900">
+  <div class="mx-auto grid max-w-7xl grid-cols-1 lg:grid-cols-2">
+    <LeftSection />
+    <ChatSection />
+  </div>
+</div>
 
+<RulesModal />
+<GameLogic />
+
+<style>
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-5px); }
+  40%, 80% { transform: translateX(5px); }
+}
+.animate-shake { animation: shake 0.4s ease; }
+</style>
