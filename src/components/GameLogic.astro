@@ -1,8 +1,6 @@
 <div client:load>
   <script type="module">
-    // Ruta al audio desde public/
     const audioIbai = "/audio/ibaiaudio.mp3";
-
     const btnEmpezar = document.getElementById("btn-empezar");
     const btnReglas = document.getElementById("btn-reglas");
     const btnCerrar = document.getElementById("cerrar-modal");
@@ -11,39 +9,151 @@
     const inputMsg = document.getElementById("input-msg");
     const btnEnviar = document.getElementById("btn-enviar");
     const modalReglas = document.getElementById("modal-reglas");
+const playSvg = `
+<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="w-8 h-8">
+  <path d="M8 5v14l11-7z"/>
+</svg>`;
 
-    const mensajeIbai = "¡Hola! Aquí tienes la pista para adivinar la frase secreta. ¡Buena suerte!";
-    const solucion = "CIRQUE DU SOL";
+const pauseSvg = `
+<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="w-8 h-8">
+  <path d="M6 19h4V5H6zm8-14v14h4V5z"/>
+</svg>`;
 
-    let intervaloTiempo = null;
 
-    function enviarMensajeAudio(texto, rutaAudio) {
-      const msg = document.createElement("div");
-      msg.className = "flex flex-col items-start space-y-2";
+const mensajeIbai = "¡Hola! Aquí tienes la pista para adivinar la frase secreta. ¡Buena suerte!";
+const solucion = "CIRQUE DU SOL";
 
-      const textoDiv = document.createElement("div");
-      textoDiv.className = "bg-white p-3 rounded-lg shadow text-gray-900 max-w-xs";
-      textoDiv.textContent = `🎤 Ibai: ${texto}`;
-      msg.appendChild(textoDiv);
 
-      if (rutaAudio) {
-        const audioElement = document.createElement("audio");
-        audioElement.controls = true;
-        audioElement.className = "w-full mt-1 rounded";
-        audioElement.src = rutaAudio;
-        msg.appendChild(audioElement);
+let intervaloTiempo = null;
 
-        audioElement.addEventListener("ended", () => iniciarJuego(msg, audioElement));
-      }
+function enviarMensajeAudio(texto, rutaAudio) {
+  const mensajesContainer = document.getElementById("mensajes");
+  const msg = document.createElement("div");
+  msg.className = "flex flex-col items-start space-y-1";
 
-      if (inputContainer) chatContainer.insertBefore(msg, inputContainer);
-      else chatContainer.appendChild(msg);
+  // Texto del mensaje
+  const textoDiv = document.createElement("div");
+textoDiv.className = "bg-gray-200 px-2 py-1 rounded-lg shadow text-gray-900 max-w-xs";
+  textoDiv.textContent = `🎤 Ibai: ${texto}`;
+  msg.appendChild(textoDiv);
 
-      chatContainer.scrollTop = chatContainer.scrollHeight;
-      return msg;
+  if (rutaAudio) {
+    const audioWrapper = document.createElement("div");
+audioWrapper.className = "bg-gray-200 p-1 rounded-lg shadow w-full flex items-center space-x-2";
+
+    const imgPerfil = document.createElement("img");
+    imgPerfil.src = "../../src/assets/ibai.jpg";
+    imgPerfil.className = "w-10 h-10 rounded-full";
+
+
+    const leftWrapper = document.createElement("div");
+    leftWrapper.className = "flex-1 flex flex-col space-y-1";
+
+    const topRow = document.createElement("div");
+    topRow.className = "flex items-center space-x-2";
+
+    const playBtn = document.createElement("button");
+playBtn.className = "text-white py-0.5 px-2 rounded-full min-w-[30px] flex items-center justify-center";
+ playBtn.innerHTML = playSvg;
+
+;
+
+    const speedBtn = document.createElement("button");
+    speedBtn.className = "bg-green-500 text-white px-3 py-1 rounded-full text-xs hover:bg-green-600";
+    speedBtn.textContent = "1x";
+
+    // Onda
+    const wave = document.createElement("div");
+    wave.className = "flex-1 h-5 flex items-center space-x-0.5 overflow-hidden";
+    const numBarras = 30;
+    const barras = [];
+    for (let i = 0; i < numBarras; i++) {
+      const altura = Math.floor(Math.random() * 5) + 10;
+      const bar = document.createElement("div");
+      bar.style.width = "5px";
+      bar.style.height = altura + "5px";
+      bar.style.backgroundColor = "#aaa";
+      wave.appendChild(bar);
+      barras.push(bar);
     }
 
-    function validarRespuestaInput() {
+    topRow.appendChild(playBtn);
+    topRow.appendChild(wave);
+    topRow.appendChild(speedBtn);
+    leftWrapper.appendChild(topRow);
+
+    const infoDiv = document.createElement("div");
+infoDiv.className = "flex justify-between text-[10px] text-gray-500 mt-0.5 px-1";
+
+    const duracion = document.createElement("span");
+    duracion.textContent = "0:00";
+
+    const horaSpan = document.createElement("span");
+    const now = new Date();
+    horaSpan.textContent = now.getHours().toString().padStart(2,"0") + ":" +
+     now.getMinutes().toString().padStart(2,"0");
+
+    infoDiv.appendChild(duracion);
+    infoDiv.appendChild(horaSpan);
+    leftWrapper.appendChild(infoDiv);
+
+    const audioElement = document.createElement("audio");
+    audioElement.src = rutaAudio;
+
+  playBtn.innerHTML = playSvg;
+
+playBtn.addEventListener("click", () => {
+  if (audioElement.paused) {
+    audioElement.play();
+    playBtn.innerHTML = pauseSvg;
+    imgPerfil.style.display = "none";
+  } else {
+    audioElement.pause();
+    playBtn.innerHTML = playSvg;
+    imgPerfil.style.display = "block";
+  }
+});
+
+    speedBtn.addEventListener("click", () => {
+      if (audioElement.playbackRate === 1) {
+        audioElement.playbackRate = 2;
+        speedBtn.textContent = "2x";
+      } else {
+        audioElement.playbackRate = 1;
+        speedBtn.textContent = "1x";
+      }
+    });
+
+   audioElement.addEventListener("timeupdate", () => {
+  const min = Math.floor(audioElement.currentTime / 60);
+  const sec = Math.floor(audioElement.currentTime % 60).toString().padStart(2,"0");
+  duracion.textContent = `${min}:${sec}`;
+
+  const progreso = audioElement.currentTime / audioElement.duration;
+  const barrasActivas = Math.floor(progreso * barras.length);
+  barras.forEach((bar, index) => {
+    bar.style.backgroundColor = index < barrasActivas ? "#fff" : "#aaa";
+  });
+});
+
+// <<< AÑADE AQUÍ >>>
+audioElement.addEventListener("ended", () => {
+  imgPerfil.style.display = "block"; // opcional
+  iniciarJuego(msg, audioElement);
+});
+
+    audioWrapper.appendChild(leftWrapper);
+    audioWrapper.appendChild(imgPerfil);
+
+    msg.appendChild(audioWrapper);
+  }
+
+  mensajesContainer.appendChild(msg);
+  mensajesContainer.scrollTop = mensajesContainer.scrollHeight;
+  return msg;
+}
+
+function validarRespuestaInput() {
       const respuesta = inputMsg.value.trim().toUpperCase().replace(/\s/g,'');
       const solucionNormalizada = solucion.replace(/\s/g,'').toUpperCase();
       if(respuesta === solucionNormalizada){
