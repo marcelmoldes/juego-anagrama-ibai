@@ -43,15 +43,14 @@ audioWrapper.className = "audio-wrapper p-1 bg-gray-200 rounded-lg shadow w-full
 
  const imgPerfil = document.createElement("img");
 imgPerfil.src = "../../src/assets/ibai.jpg";
-imgPerfil.className = "w-10 h-10 rounded-full flex-shrink-0 self-start";
-
-
+// Línea corregida
+imgPerfil.className = "w-10 h-10 rounded-full absolute top-1/2 right-0 -translate-y-1/2";
 
     const leftWrapper = document.createElement("div");
     leftWrapper.className = "flex-1 flex flex-col space-y-1";
 
     const topRow = document.createElement("div");
-topRow.className = "flex items-center space-x-4"; 
+topRow.className = "flex items-center w-full";
 const playBtn = document.createElement("button");
 playBtn.className = "text-white py-0.5 px-2 rounded-full min-w-[30px] flex items-center justify-center";
  playBtn.innerHTML = playSvg;
@@ -61,7 +60,7 @@ playBtn.className = "text-white py-0.5 px-2 rounded-full min-w-[30px] flex items
 const speedBtn = document.createElement("button");
 speedBtn.className = "speed-btn bg-green-500 text-white px-3 py-1 rounded-full justify-center text-xs hover:bg-green-600 text-center";
 speedBtn.textContent = "1x";
-speedBtn.style.display = "none";
+speedBtn.style.visibility = "hidden"; // Oculta pero mantiene el espacio
 speedBtn.style.alignItems = "center";
 speedBtn.style.justifyContent = "center";
 speedBtn.style.fontFamily = "sans-serif";
@@ -72,8 +71,10 @@ speedBtn.style.borderRadius = "9999px";
 speedBtn.style.lineHeight = "1";   
 speedBtn.style.padding = "0";         
 speedBtn.style.textAlign = "center";
-speedBtn.style.overflow = "hidden";
-
+speedBtn.style.position = "absolute";
+speedBtn.style.top = "50%";
+speedBtn.style.right = "0";
+speedBtn.style.transform = "translateY(-50%)";
 const progressWrapper = document.createElement("div");
 progressWrapper.className = "relative w-full h-2 flex items-center flex-shrink-0";
 
@@ -90,8 +91,7 @@ progressWrapper.appendChild(progressHandle);
 
 
 const waveContainer = document.createElement("div");
-waveContainer.className = "flex flex-col justify-center space-y-1 flex-grow min-w-[0]";
-
+waveContainer.className = "flex flex-col justify-center space-y-1 flex-grow min-w-[0] mx-4";
 const progressRow = document.createElement("div");
 progressRow.className = "relative flex items-center space-x-2 w-full";
 
@@ -115,9 +115,13 @@ progressRow.appendChild(progressWrapper);
 waveContainer.appendChild(progressRow);
 
 const rightWrapper = document.createElement("div");
-rightWrapper.className = "right-wrapper";
+rightWrapper.className = "relative flex-shrink-0";rightWrapper.style.minWidth = "60px"; 
 rightWrapper.appendChild(imgPerfil);
+
+
+speedBtn.style.visibility = "hidden"; 
 rightWrapper.appendChild(speedBtn);
+
 
 topRow.appendChild(playBtn);
 topRow.appendChild(waveContainer);
@@ -138,9 +142,6 @@ infoDiv.className = "flex justify-between text-[10px] text-gray-500 mt-0.5 px-1"
 
     const horaSpan = document.createElement("span");
     const now = new Date();
-
-   const newHoras = now.getHours() + Math.floor(now.getMinutes()/60);
-
 
 
     horaSpan.textContent = now.getHours().toString().padStart(2,"0") + ":" +
@@ -197,14 +198,14 @@ playBtn.addEventListener("click", () => {
     playBtn.innerHTML = pauseSvg;
 
     imgPerfil.style.display = "none"; 
-    speedBtn.style.display = "flex";  
+speedBtn.style.visibility = "visible"; 
     barras.forEach(bar => bar.style.animationPlayState = "running");
   } else {
     audioElement.pause();
     playBtn.innerHTML = playSvg;
 
     imgPerfil.style.display = "none"; 
-    speedBtn.style.display = "flex"; 
+speedBtn.style.visibility = "visible";
     barras.forEach(bar => bar.style.animationPlayState = "paused");
   }
 });
@@ -249,9 +250,7 @@ speedBtn.addEventListener("click", () => {
 
 
     audioWrapper.appendChild(leftWrapper);
-    audioWrapper.appendChild(imgPerfil);
-
-    msg.appendChild(audioWrapper);
+  msg.appendChild(audioWrapper);
   }
 
   mensajesContainer.appendChild(msg);
