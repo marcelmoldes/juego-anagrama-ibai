@@ -1,1 +1,18 @@
 @import "tailwindcss";
+
+<style>
+@keyframes wave {
+  0%, 100% { transform: scaleY(0.4); opacity: 0.6; }
+  50% { transform: scaleY(1); opacity: 1; }
+}
+.barra-onda {
+  width: 3px;
+  background-color: #aaa;
+  border-radius: 2px;
+  transform-origin: bottom;
+  animation: wave 1s ease-in-out infinite;
+}
+.barra-onda.activa {
+  background-color: #4ade80; /* verde tipo WhatsApp */
+}
+</style>

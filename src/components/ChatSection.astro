@@ -1,11 +1,6 @@
----
-// src/components/WhatsAppChat.astro
----
-
-
 <div
   id="chat-container"
-  class="max-w-md mx-auto mt-10 bg-gray-100 rounded-xl shadow-lg flex flex-col h-[600px] min-h-0 overflow-hidden"
+  class="max-w-md mx-auto mt-10 bg-gray-100 rounded-xl shadow-lg flex flex-col h-[600px] overflow-hidden"
 >
   <!-- HEADER -->
   <div class="flex items-center bg-green-600 text-white px-4 py-3">
@@ -23,13 +18,13 @@
   <!-- MENSAJES -->
   <div
     id="mensajes"
-    class="flex-1 overflow-y-auto px-4 py-3 space-y-2 bg-gray-50 min-h-0"
-  >
-    <!-- Aquí tu JS insertará los mensajes -->
-  </div>
+    class="flex-1 overflow-y-auto px-4 py-3 space-y-2 bg-gray-50"
+  ></div>
 
   <!-- INPUT -->
-  <div class="flex items-center gap-2 bg-gray-200 p-3">
+  <div
+    class="flex items-center gap-2 bg-gray-200 p-3 border-t border-gray-300"
+  >
     <input
       id="input-msg"
       type="text"

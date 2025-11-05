@@ -38,49 +38,97 @@ textoDiv.className = "bg-gray-200 px-2 py-1 rounded-lg shadow text-gray-900 max-
   msg.appendChild(textoDiv);
 
   if (rutaAudio) {
-    const audioWrapper = document.createElement("div");
-audioWrapper.className = "bg-gray-200 p-1 rounded-lg shadow w-full flex items-center space-x-2";
+const audioWrapper = document.createElement("div");
+audioWrapper.className = "audio-wrapper p-1 bg-gray-200 rounded-lg shadow w-full flex justify-between items-center space-x-2";
 
-    const imgPerfil = document.createElement("img");
-    imgPerfil.src = "../../src/assets/ibai.jpg";
-    imgPerfil.className = "w-10 h-10 rounded-full";
+ const imgPerfil = document.createElement("img");
+imgPerfil.src = "../../src/assets/ibai.jpg";
+imgPerfil.className = "w-10 h-10 rounded-full flex-shrink-0 self-start";
+
 
 
     const leftWrapper = document.createElement("div");
     leftWrapper.className = "flex-1 flex flex-col space-y-1";
 
     const topRow = document.createElement("div");
-    topRow.className = "flex items-center space-x-2";
-
-    const playBtn = document.createElement("button");
+topRow.className = "flex items-center space-x-4"; 
+const playBtn = document.createElement("button");
 playBtn.className = "text-white py-0.5 px-2 rounded-full min-w-[30px] flex items-center justify-center";
  playBtn.innerHTML = playSvg;
 
 ;
 
-    const speedBtn = document.createElement("button");
-    speedBtn.className = "bg-green-500 text-white px-3 py-1 rounded-full text-xs hover:bg-green-600";
-    speedBtn.textContent = "1x";
+const speedBtn = document.createElement("button");
+speedBtn.className = "speed-btn bg-green-500 text-white px-3 py-1 rounded-full justify-center text-xs hover:bg-green-600 text-center";
+speedBtn.textContent = "1x";
+speedBtn.style.display = "none";
+speedBtn.style.alignItems = "center";
+speedBtn.style.justifyContent = "center";
+speedBtn.style.fontFamily = "sans-serif";
+speedBtn.style.fontSize = "12px";
+speedBtn.style.height = "26px";      
+speedBtn.style.width = "45px";        
+speedBtn.style.borderRadius = "9999px";
+speedBtn.style.lineHeight = "1";   
+speedBtn.style.padding = "0";         
+speedBtn.style.textAlign = "center";
+speedBtn.style.overflow = "hidden";
 
-    // Onda
-    const wave = document.createElement("div");
-    wave.className = "flex-1 h-5 flex items-center space-x-0.5 overflow-hidden";
-    const numBarras = 30;
-    const barras = [];
-    for (let i = 0; i < numBarras; i++) {
-      const altura = Math.floor(Math.random() * 5) + 10;
-      const bar = document.createElement("div");
-      bar.style.width = "5px";
-      bar.style.height = altura + "5px";
-      bar.style.backgroundColor = "#aaa";
-      wave.appendChild(bar);
-      barras.push(bar);
-    }
+const progressWrapper = document.createElement("div");
+progressWrapper.className = "relative w-full h-2 flex items-center flex-shrink-0";
 
-    topRow.appendChild(playBtn);
-    topRow.appendChild(wave);
-    topRow.appendChild(speedBtn);
-    leftWrapper.appendChild(topRow);
+const wave = document.createElement("div");
+wave.className = "flex-1 h-10 flex items-end space-x-0.5 overflow-hidden mt-2";
+
+const progressHandle = document.createElement("div");
+progressHandle.className = "absolute top-1/2 w-3 h-3 bg-green-700 rounded-full -translate-y-1/2 cursor-pointer shadow-md";
+progressHandle.style.left = "0%";
+progressHandle.style.transition = "left 0.05s linear";
+
+progressWrapper.appendChild(wave);
+progressWrapper.appendChild(progressHandle);
+
+
+const waveContainer = document.createElement("div");
+waveContainer.className = "flex flex-col justify-center space-y-1 flex-grow min-w-[0]";
+
+const progressRow = document.createElement("div");
+progressRow.className = "relative flex items-center space-x-2 w-full";
+
+const waveOverlay = document.createElement("div");
+waveOverlay.className = "absolute top-0 left-0 w-full h-[22px] flex items-start justify-between ml-10px pointer-events-none";
+
+const numBarras = 20;
+const barras = [];
+
+for (let i = 0; i < numBarras; i++) {
+const altura = Math.floor(Math.random() * 10) + 10; 
+  const bar = document.createElement("div");
+  bar.className = "bg-green-500 w-1 rounded barra-onda";
+  bar.style.height = `${altura}px`;
+  bar.style.animationDelay = `${i * 0.05}s`;
+  waveOverlay.appendChild(bar);
+  barras.push(bar);
+}
+progressWrapper.appendChild(waveOverlay);
+progressRow.appendChild(progressWrapper);
+waveContainer.appendChild(progressRow);
+
+const rightWrapper = document.createElement("div");
+rightWrapper.className = "right-wrapper";
+rightWrapper.appendChild(imgPerfil);
+rightWrapper.appendChild(speedBtn);
+
+topRow.appendChild(playBtn);
+topRow.appendChild(waveContainer);
+topRow.appendChild(rightWrapper);
+
+
+
+
+
+
+leftWrapper.appendChild(topRow);
 
     const infoDiv = document.createElement("div");
 infoDiv.className = "flex justify-between text-[10px] text-gray-500 mt-0.5 px-1";
@@ -90,6 +138,11 @@ infoDiv.className = "flex justify-between text-[10px] text-gray-500 mt-0.5 px-1"
 
     const horaSpan = document.createElement("span");
     const now = new Date();
+
+   const newHoras = now.getHours() + Math.floor(now.getMinutes()/60);
+
+
+
     horaSpan.textContent = now.getHours().toString().padStart(2,"0") + ":" +
      now.getMinutes().toString().padStart(2,"0");
 
@@ -99,30 +152,88 @@ infoDiv.className = "flex justify-between text-[10px] text-gray-500 mt-0.5 px-1"
 
     const audioElement = document.createElement("audio");
     audioElement.src = rutaAudio;
+audioElement.addEventListener("timeupdate", () => {
+  if (!audioElement.duration) return;
+  const progreso = audioElement.currentTime / audioElement.duration;
+  progressHandle.style.left = `${progreso * 100}%`;
+});
 
-  playBtn.innerHTML = playSvg;
+
+
+progressWrapper.addEventListener("click", (e) => {
+  const rect = progressWrapper.getBoundingClientRect();
+  const clickX = e.clientX - rect.left;
+  const porcentaje = clickX / rect.width;
+  audioElement.currentTime = porcentaje * audioElement.duration;
+});
+
+
+let dragging = false;
+
+progressHandle.addEventListener("mousedown", (e) => {
+  e.preventDefault();
+  dragging = true;
+});
+
+document.addEventListener("mouseup", () => {
+  if (dragging) dragging = false;
+});
+
+document.addEventListener("mousemove", (e) => {
+  if (!dragging) return;
+  const rect = progressWrapper.getBoundingClientRect();
+  const moveX = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+  const porcentaje = moveX / rect.width;
+  progressBar.style.width = `${porcentaje * 100}%`;
+  progressHandle.style.left = `${porcentaje * 100}%`;
+  audioElement.currentTime = porcentaje * audioElement.duration;
+});
+
+playBtn.innerHTML = playSvg;
 
 playBtn.addEventListener("click", () => {
   if (audioElement.paused) {
     audioElement.play();
     playBtn.innerHTML = pauseSvg;
-    imgPerfil.style.display = "none";
+
+    imgPerfil.style.display = "none"; 
+    speedBtn.style.display = "flex";  
+    barras.forEach(bar => bar.style.animationPlayState = "running");
   } else {
     audioElement.pause();
     playBtn.innerHTML = playSvg;
-    imgPerfil.style.display = "block";
+
+    imgPerfil.style.display = "none"; 
+    speedBtn.style.display = "flex"; 
+    barras.forEach(bar => bar.style.animationPlayState = "paused");
   }
 });
 
-    speedBtn.addEventListener("click", () => {
-      if (audioElement.playbackRate === 1) {
-        audioElement.playbackRate = 2;
-        speedBtn.textContent = "2x";
-      } else {
-        audioElement.playbackRate = 1;
-        speedBtn.textContent = "1x";
-      }
-    });
+
+audioElement.addEventListener("ended", () => {
+  playBtn.innerHTML = playSvg;
+  imgPerfil.style.display = "none";
+  wave.style.display = "none";
+  speedBtn.style.display = "inline-block";
+  barras.forEach(bar => bar.style.animationPlayState = "paused");
+  iniciarJuego(msg, audioElement);
+});
+
+
+
+speedBtn.addEventListener("click", () => {
+  if (audioElement.playbackRate === 1) {
+    audioElement.playbackRate = 1.5;
+    speedBtn.textContent = "1.5x";
+  } else if (audioElement.playbackRate === 1.5) {
+    audioElement.playbackRate = 2;
+    speedBtn.textContent = "2x";
+  } else {
+    audioElement.playbackRate = 1;
+    speedBtn.textContent = "1x";
+  }
+});
+
 
    audioElement.addEventListener("timeupdate", () => {
   const min = Math.floor(audioElement.currentTime / 60);
@@ -136,11 +247,6 @@ playBtn.addEventListener("click", () => {
   });
 });
 
-// <<< AÑADE AQUÍ >>>
-audioElement.addEventListener("ended", () => {
-  imgPerfil.style.display = "block"; // opcional
-  iniciarJuego(msg, audioElement);
-});
 
     audioWrapper.appendChild(leftWrapper);
     audioWrapper.appendChild(imgPerfil);
@@ -262,3 +368,4 @@ function validarRespuestaInput() {
     });
   </script>
 </div>
+
